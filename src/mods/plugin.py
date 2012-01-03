@@ -1,4 +1,7 @@
 from twisted.python import log
+from collections import namedtuple
+
+User = namedtuple("User", "name host")
 
 class Plugin(object):
     __NAME__ = None
@@ -6,17 +9,22 @@ class Plugin(object):
 
     def __init__(self, manager):
         self.manager = manager
-        self.targetted_commands = {}
+        self.targeted_commands = {}
 
     def register_command(self, command, callback):
-        self.targetted_commands[command] = callback
+        self.targeted_commands[command] = callback
         log.msg("[%s] registered command %s"%(self.__NAME__, command))
 
     def message(self, channel, message):
         self.manager.SendPluginMessage(self.__NAME__, message, channel)
 
     def hasCommand(self, command):
-        return command in self.targetted_commands
+        return command in self.targeted_commands
 
-    def handleCommand(self, command, channel, user, args):
-        self.targetted_commands[command](channel, user, args)
+    def handleCommand(self, command, sender, args):
+        self.targeted_commands[command](sender, args)
+
+    def getUser(self, user):
+        name = user.split("!")[0]
+        host = user.split("@")[1]
+        return User(name, host)

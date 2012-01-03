@@ -3,7 +3,6 @@ from twisted.internet import protocol, defer
 from twisted.protocols import basic
 from twisted.internet import reactor
 from twisted.python import log
-from twisted.web.client import Agent
 from zope.interface import implements
 from twisted.internet import ssl
 
@@ -69,15 +68,15 @@ class FileManager(object):
 
     def SendPluginMessage(self, plugin_name, message, channel):
         if self.irc:
-            self.irc.emit("[%] %s"%(plugin_name, message), channel=channel)
+            self.irc.sendmsg("[%s] %s"%(plugin_name, message), channel=channel)
 
     def tail_closed(self, file_name, status):
         if self.irc:
-            self.irc.emit("Tail for file name %s closed! Status: %s"%(file_name, status))
+            self.irc.sendmsg("Tail for file name %s closed! Status: %s"%(file_name, status))
 
     def error_callback(self, name, data):
         if self.irc:
-            self.irc.emit("Tail Error (%s)"%name, data)
+            self.irc.sendmsg("Tail Error (%s)"%name, data)
 
     def add_file(self, file_o):
         self.files.append(file_o)
@@ -95,7 +94,7 @@ class FileManager(object):
             line_time, line = yield file_o.pop()
             #TODO: what if irc fails?
             if self.irc:
-                self.irc.emit(file_o.name, line_time, line, channel=file_o.channel)
+                self.irc.emit(file_o.name, line, channel=file_o.channel)
 
 class TailProtocol(protocol.ProcessProtocol, basic.LineOnlyReceiver):
     delimiter = "\n"
@@ -145,32 +144,51 @@ class LogBot(irc.IRCClient):
         self.factory.file_manager.irc = self
 
     def joined(self, channel):
-        if not channel == LOGBOT_CHANNEL or not channel in OTHER_CHANNELS:
+        if (not channel == LOGBOT_CHANNEL) and (not channel in OTHER_CHANNELS):
             self.leave(channel)
 
     def privmsg(self, user, channel, message):
         if user.startswith("LogBot|"):
             return # Ignore messages from other LogBots
         split = shlex.split(message, posix=False)
-        if not len(split) >= 2:
-            return
 
         matched = False
+        if not channel == self.nickname:
 
-        if split[0] == self.nickname:
-            matched = True
+            if not len(split) >= 3: # Target Module Command
+                return
+
+            if split[0] == self.nickname:
+                matched = True
+            else:
+                try:
+                    if re.match(split[0], self.nickname):
+                        matched = True
+                        args = split[1:]
+                        sender = channel
+                except Exception:
+                    pass
         else:
-            try:
-                if re.match(split[0], self.nickname):
-                    matched = True
-            except Exception:
-                pass
+            if not len(split) >= 2: # Module Command
+                return
+            matched = True
+            args = split
+            sender = user
 
         if matched:
-            self.factory.file_manager.mods.GotMessage(user, channel, split[1:])
+            log.msg(args)
+            self.factory.file_manager.mods.GotMessage(sender, args)
 
+    def sendmsg(self, message, channel=None):
+        if channel:
+            if channel[0] == "#":
+                self.say(channel, message, length=200)
+            else:
+                self.msg(channel, message, length=200)
+        else:
+            self.say(LOGBOT_CHANNEL, message, length=200)
 
-    def emit(self, name, time, message, channel=None):
+    def emit(self, name, message, channel=None):
         self.say(channel or LOGBOT_CHANNEL, "%s: %s"%(name, message), length=200)
 
 
@@ -205,4 +223,4 @@ if __name__ == "__main__":
             config["files"][item].get("channel",None)
         ))
 
-    #reactor.run()
+    reactor.run()

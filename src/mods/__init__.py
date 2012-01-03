@@ -4,20 +4,26 @@ import importlib
 class ModManager(object):
     def __init__(self, parent, config):
         self.handlers = []
+        self.parent = parent
 
         for mod in config["mods"]:
-            try:
-                module = importlib.import_module("mods.%s"%mod)
-                self.handlers.append(module.Mod(self, config["mods"][mod].get("settings",None)))
-                log.msg("Loaded plugin %s v%s"%(mod, module.Mod.__VERSION__))
-            except Exception:
-                log.err(_why="Could not import mod.%s"%mod)
+            if config["mods"][mod]["enabled"]:
+                try:
+                    module = importlib.import_module("mods.%s"%mod)
+                    self.handlers.append(module.Mod(self, config["mods"][mod].get("settings",None)))
+                    log.msg("Loaded plugin %s v%s"%(mod, module.Mod.__VERSION__))
+                except Exception:
+                    log.err(_why="Could not import mod.%s"%mod)
 
-    def GotMessage(self, user, channel, args):
-        command = args[0]
+    def SendPluginMessage(self, *args):
+        self.parent.SendPluginMessage(*args)
+
+    def GotMessage(self, sender, args):
+        module, command = args[:2]
         for handler in self.handlers:
-            if handler.hasCommand(command):
-                handler.handleCommand(command, user, channel, args)
+            if handler.__NAME__.lower() == module.lower() and handler.hasCommand(command):
+                #log.msg("Dispatching command %s - Sender: %s | Args: %s"%(command, sender, args[2:]))
+                handler.handleCommand(command, sender, args[2:])
 
     def handleEvent(self, event_name, *args, **kwargs):
         for handler in self.handlers:
