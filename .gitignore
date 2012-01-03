@@ -1,0 +1,6 @@
+/Include
+/Lib
+/Scripts
+/.idea
+*.pyc
+/src/config.yaml

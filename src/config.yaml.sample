@@ -1,0 +1,46 @@
+server:
+    # Channel:  The default channel to output messages to (Can be overridden on a file-by-file basis)
+    # IP:       The IRC server IP address to connect to
+    # Port:     The port the IRC server is running on
+    # Name:     The name of the IRC client which will connect. Leave blank to auto-detect (based on the servers hostname)
+    # User:     If the logbot needs oper on the IRC server enter the user here. Will be prefixed with "LogBot|"
+    # Password: The oper password for the IRC client (if needed)
+    channel:  "#testing"
+    ip:       1.1.1.1
+    port:     6667
+    name:     YourServer
+    user:     LogBot
+    password: password
+
+logbot:
+    tail_location:
+        linux: /usr/bin/tail
+        windows: C:\\gnu\\bin\\tail.exe
+
+files:
+    secure:
+        path: /var/log/secure
+        channel: "#secure" # Output the messages to a different channel
+    yum:
+        path: /var/log/yum
+    messages:
+        path: /var/log/messages
+    vzctl:
+        path: /var/log/vzctl.log
+
+mods:
+    sysinfo:
+        enabled: true
+
+    mdstat:
+        # Allows you to view the status on RAID devices (rebuild, status etc)
+        enabled: true
+
+    remoteinfo:
+        # Allows authenticated scripts request system metrics like uptime, loadavg, traffic etc.
+        enabled: true
+        settings:
+            loadavg = True
+            uptime  = True
+            traffic = True
+            auth_key = PASSWORD
