@@ -176,7 +176,6 @@ class LogBot(irc.IRCClient):
             sender = user
 
         if matched:
-            log.msg(args)
             self.factory.file_manager.mods.GotMessage(sender, args)
 
     def sendmsg(self, message, channel=None):

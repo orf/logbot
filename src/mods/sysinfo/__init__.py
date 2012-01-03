@@ -2,6 +2,7 @@ from .. import plugin
 from twisted.internet import reactor
 import psutil
 import os
+import platform
 
 def byte_format(num):
     for x in ['bytes','KB','MB','GB','TB']:
@@ -22,6 +23,10 @@ class Mod(plugin.Plugin):
         self.register_command("io_counter", self.disk_io_counters)
         self.register_command("loadavg", self.load_average)
         self.register_command("cpu", self.cpu_load)
+        self.register_command("uname", self.uname)
+
+    def uname(self, sender, arguments):
+        return self.message(sender, " ".join(platform.uname()))
 
     def display_memory(self, sender, arguments):
         ''' Display the total, used and free memory values for the current system '''
