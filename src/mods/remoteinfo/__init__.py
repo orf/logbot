@@ -7,12 +7,25 @@ from twisted.python import log
 if not platform.system() == "Linux":
     import win32pdh
 
-class GetUptime(resource.Resource):
+class StatBase(resource.Resource):
     def __init__(self, settings):
         self.settings = settings
         resource.Resource.__init__(self)
 
     def render(self, request):
+        qs = request.args.get("pass",[])
+        if not len(qs):
+            return ""
+        if not qs[0] == self.settings["auth_key"]:
+            return ""
+
+        return self.GetStat(request)
+
+    def GetStat(self, request):
+        raise NotImplementedError
+
+class GetUptime(StatBase):
+    def GetStat(self, request):
         if platform.system() == "Windows":
             path = win32pdh.MakeCounterPath( ( None, 'System', None, None, 0, 'System Up Time') )
             query = win32pdh.OpenQuery()
