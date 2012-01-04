@@ -14,4 +14,4 @@ rm -r -f /tmp/logbot*
 
 cd ~/logbot
 source bin/activate
-cat REQUIRES | xargs pip install
+cat REQUIRES | xargs ./bin/pip install
