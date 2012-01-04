@@ -52,5 +52,6 @@ class Mod(plugin.Plugin):
         if self.settings.get("uptime",False):
             self.log("Uptime enabled")
             root.putChild("uptime", GetUptime(self.settings))
-        internet.TCPServer(self.settings.get("listen_port",2000), server.Site(root)).setServiceParent(application)
+        internet.TCPServer(self.settings.get("listen_port",2000), server.Site(root),
+                           interface=self.settings.get("listen_ip",None)).setServiceParent(application)
 
