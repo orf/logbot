@@ -11,6 +11,12 @@ class Plugin(object):
         self.manager = manager
         self.targeted_commands = {}
 
+    def log(self, msg):
+        log.msg("[%s] %s"%(self.__NAME__, msg))
+
+    def getTwistedServiceCollection(self):
+        return self.manager.getServiceCollection()
+
     def register_command(self, command, callback):
         self.targeted_commands[command] = callback
         log.msg("[%s] registered command %s"%(self.__NAME__, command))

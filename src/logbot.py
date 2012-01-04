@@ -1,13 +1,14 @@
 from twisted.words.protocols import irc
-from twisted.internet import protocol, defer
 from twisted.protocols import basic
-from twisted.internet import reactor
+from twisted.internet import reactor, ssl, protocol, defer
 from twisted.python import log
 from zope.interface import implements
-from twisted.internet import ssl
-
+from twisted.application import internet, service
+from twisted.python.logfile import DailyLogFile
+from twisted.python.log import  FileLogObserver
 from twisted.internet.defer import succeed
 from twisted.web.iweb import IBodyProducer
+import os
 
 import urllib
 import sys
@@ -39,7 +40,7 @@ class Producer(object):
     def stopProducing(self):
         pass
 
-log.startLogging(sys.stdout)
+#log.startLogging(sys.stdout)
 
 
 class TailedFile(object):
@@ -58,13 +59,18 @@ class TailedFile(object):
 
 
 class FileManager(object):
-    def __init__(self, config):
+    def __init__(self, config, services):
         self.files = []
 
         self.irc = None
-        reactor.connectSSL(LOGBOT_LOCATION, LOGBOT_PORT, LogBotFactory(self), ssl.ClientContextFactory())
+        self.services = services
+        internet.SSLClient(LOGBOT_LOCATION, LOGBOT_PORT, LogBotFactory(self), ssl.ClientContextFactory()
+                            ).setServiceParent(services)
         self.mods = mods.ModManager(self, config)
         self.mods.handleEvent("LOAD")
+
+    def getServiceCollection(self):
+        return self.services
 
     def SendPluginMessage(self, plugin_name, message, channel):
         if self.irc:
@@ -95,6 +101,7 @@ class FileManager(object):
             #TODO: what if irc fails?
             if self.irc:
                 self.irc.emit(file_o.name, line, channel=file_o.channel)
+            self.mods.handleEvent("DATA", file_o, line)
 
 class TailProtocol(protocol.ProcessProtocol, basic.LineOnlyReceiver):
     delimiter = "\n"
@@ -198,7 +205,7 @@ class LogBotFactory(protocol.ReconnectingClientFactory):
         self.file_manager = file_manager
 
 
-if __name__ == "__main__":
+if __name__ in ("__main__", "__builtin__"):
     with open("config.yaml","r") as fd:
         config = yaml.load(fd)
     LOGBOT_CHANNEL  = config["server"]["channel"]
@@ -215,11 +222,17 @@ if __name__ == "__main__":
     OTHER_CHANNELS = [config["files"][x].get("channel",None) for x in config["files"]
                                                              if config["files"][x].get("channel",None)]
 
-    manager = FileManager(config)
+    application = service.Application('LogBot')#, uid=1, gid=1)
+    if not os.path.exists("logs"):
+        os.mkdir("logs")
+    logfile = DailyLogFile("logbot.log","logs")
+    log_observer = FileLogObserver(logfile).emit
+    #application.setComponent(ILogObserver, log_observer)
+    log.addObserver(log_observer)
+    serviceCollection = service.IServiceCollection(application)
+    manager = FileManager(config, serviceCollection)
     for item in config["files"]:
         manager.add_file(TailedFile(item,
             config["files"][item]["path"],
             config["files"][item].get("channel",None)
         ))
-
-    reactor.run()

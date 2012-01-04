@@ -40,7 +40,8 @@ mods:
         # Allows authenticated scripts request system metrics like uptime, loadavg, traffic etc.
         enabled: true
         settings:
-            loadavg = True
-            uptime  = True
-            traffic = True
-            auth_key = PASSWORD
+            listen_port: 2000
+            loadavg:     True
+            uptime:      True
+            cpu:         True
+            auth_key:    auth*2141244222

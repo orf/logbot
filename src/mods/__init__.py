@@ -15,6 +15,9 @@ class ModManager(object):
                 except Exception:
                     log.err(_why="Could not import mod.%s"%mod)
 
+    def getServiceCollection(self):
+        return self.parent.getServiceCollection()
+
     def SendPluginMessage(self, *args):
         self.parent.SendPluginMessage(*args)
 
