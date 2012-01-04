@@ -1,5 +1,5 @@
 PyYAML==3.10
 Twisted==11.1.0
 psutil==0.4.1
-pyopenssl==0.13
+pyopenssl==0.11
 zope.interface==3.8.0
