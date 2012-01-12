@@ -58,7 +58,7 @@ class Mod(plugin.Plugin):
         if not hasattr(os, "getloadavg"):
             return self.message(sender, "Cannot get the system load average, try using cpu average instead")
 
-        return "%.2f %.2f %.2f"%os.getloadavg()
+        return self.message(sender, "%.2f %.2f %.2f"%os.getloadavg())
 
     def cpu_load(self, sender, arguments):
         ''' Return the average CPU utilization for all cores measured over 1 second

@@ -126,7 +126,7 @@ class TailProtocol(protocol.ProcessProtocol, basic.LineOnlyReceiver):
 
     # Handle STDOUT and STDIN
     def outReceived(self, data):
-        log.msg("Got data: %s"%repr(data))
+        #log.msg("Got data: %s"%repr(data))
         self.dataReceived(data)
 
     def errReceived(self, data):

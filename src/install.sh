@@ -1,7 +1,6 @@
-curl -kL http://xrl.us/pythonbrewinstall | bash
-echo "[[ -s $HOME/.pythonbrew/etc/bashrc ]] && source $HOME/.pythonbrew/etc/bashrc" >> ~/.bashrc
+# Run this first then start a screen session or a new shell:
+#   curl -kL http://xrl.us/pythonbrewinstall | bash
 
-source $HOME/.pythonbrew/etc/bashrc
 pythonbrew install 2.7.2 --no-test -j 2
 pythonbrew venv init
 pythonbrew venv create ~/logbot -p 2.7.2
