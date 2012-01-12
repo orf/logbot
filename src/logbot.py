@@ -167,6 +167,8 @@ class LogBot(irc.IRCClient):
 
             if split[0] == self.nickname:
                 matched = True
+                args = split
+                sender = user
             else:
                 try:
                     if re.match(split[0], self.nickname):
