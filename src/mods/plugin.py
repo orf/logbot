@@ -28,6 +28,7 @@ class Plugin(object):
         return command in self.targeted_commands
 
     def handleCommand(self, command, sender, args):
+        #print command, sender, args
         self.targeted_commands[command](sender, args)
 
     def getUser(self, user):

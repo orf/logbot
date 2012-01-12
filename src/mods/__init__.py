@@ -25,7 +25,6 @@ class ModManager(object):
         module, command = args[:2]
         for handler in self.handlers:
             if handler.__NAME__.lower() == module.lower() and handler.hasCommand(command):
-                #log.msg("Dispatching command %s - Sender: %s | Args: %s"%(command, sender, args[2:]))
                 handler.handleCommand(command, sender, args[2:])
 
     def handleEvent(self, event_name, *args, **kwargs):

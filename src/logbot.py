@@ -166,25 +166,29 @@ class LogBot(irc.IRCClient):
                 return
 
             if split[0] == self.nickname:
+                print "Nickname matched"
                 matched = True
-                args = split
-                sender = user
+                args = split[1:]
+                sender = channel
             else:
+                return
+            '''else:
                 try:
                     if re.match(split[0], self.nickname):
                         matched = True
                         args = split[1:]
                         sender = channel
                 except Exception:
-                    pass
+                    pass'''
         else:
             if not len(split) >= 2: # Module Command
                 return
             matched = True
             args = split
-            sender = user
+            sender = user.split("!")[0]
 
         if matched:
+            print sender, args
             self.factory.file_manager.mods.GotMessage(sender, args)
 
     def sendmsg(self, message, channel=None):
