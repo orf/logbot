@@ -2,6 +2,7 @@
 #   curl -kL http://xrl.us/pythonbrewinstall | bash
 
 pythonbrew install 2.7.2 --no-test -j 2
+pythonbrew cleanup
 pythonbrew venv init
 pythonbrew venv create ~/logbot -p 2.7.2
 cd ~/logbot
