@@ -1,3 +1,4 @@
 LogBot is a IRC client that runs on your network of servers and tails a list of files.
 New lines are spat into various channels that you define.
-This file was modified by PyCharm 2.0.1 for binding GitHub repository
+
+It also comes with a few plugins (and you can create your own quite easily) to view mdstat output and get system info like uptime, disk counters and other stuff.
